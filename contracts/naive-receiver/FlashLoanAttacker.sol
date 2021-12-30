@@ -24,10 +24,10 @@ contract FlashLoanAttacker {
                 )
             );
             /**
-            * Noted that when calling abi.encodeWithSignature, 
-            * the function prototype of the signature string should not contain " "
-            * e.g. "flashLoan(address, uint256)" will cause error in encoding
-            */
+             * Noted that when calling abi.encodeWithSignature, 
+             * the function prototype of the signature string should not contain " "
+             * e.g. "flashLoan(address, uint256)" will cause error in encoding
+             */
         }
     }
 }
@@ -52,6 +52,6 @@ contract BetterNaiveReceiverAttacker {
 }
 
 /**
-* A more readable solution by the use of interface
-* Seen on: https://github.com/broccolirob/damn-vulnerable-defi/blob/fe5976abbc7c5556f15b3844034f4dfbe6a2d5a7/contracts/attacker-contracts/NaiveReceiverAttack.sol
-*/
+ * A more readable solution by the use of interface
+ * Seen on: https://github.com/broccolirob/damn-vulnerable-defi/blob/fe5976abbc7c5556f15b3844034f4dfbe6a2d5a7/contracts/attacker-contracts/NaiveReceiverAttack.sol
+ */
