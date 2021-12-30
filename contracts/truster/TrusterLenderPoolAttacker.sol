@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @title TrusterLenderPool
- * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
+ * @title TrusterLenderPoolAttacker
+ * @author kootsZhin
  */
 
  contract TrusterLenderPoolAttacker {

